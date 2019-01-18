@@ -7,7 +7,6 @@ data_dir = '/tmp/tensorflow/mnist/input_data'
 mnist = input_data.read_data_sets(data_dir, one_hot=True)
 x = tf.placeholder(tf.float32, [None, 784])
 y_ = tf.placeholder(tf.float32, [None, 10])
-learning_rate = tf.placeholder(tf.float32)
 x_image = tf.reshape(x, [-1, 28, 28, 1])
 
 def main(_):
@@ -45,7 +44,7 @@ def main(_):
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_out))
     l2_loss = tf.add_n([tf.nn.l2_loss(w) for w in tf.get_collection('WEIGHTS')])
     total_loss = cross_entropy + 7e-5 * l2_loss
-    train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(total_loss)
+    train_step = tf.train.GradientDescentOptimizer(0.01).minimize(total_loss)
 
     sess = tf.Session()
     init_op = tf.global_variables_initializer()
