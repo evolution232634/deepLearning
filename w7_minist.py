@@ -51,14 +51,16 @@ def main(_):
     init_op = tf.global_variables_initializer()
     sess.run(init_op)
 
-    for step in range(3000):
-        batch_xs, batch_ys = mnist.train.next_batch(100)
-        lr = 0.01
-        sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, learning_rate: lr, keep_prob: 0.5})
-
     correct_prediction = tf.equal(tf.argmax(y_out, 1), tf.argmax(y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    print(sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels,  keep_prob: 0.5}))
+
+    for step in range(3000):
+        batch_xs, batch_ys = mnist.train.next_batch(100)
+        if step % 100 == 0:
+            train_accuracy = accuracy.eval(feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
+            print("step %d, training accuracy %g" % (step, train_accuracy))
+        sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
+
 
 
 if __name__ == '__main__':
