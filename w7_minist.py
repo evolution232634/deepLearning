@@ -10,53 +10,62 @@ y_ = tf.placeholder(tf.float32, [None, 10])
 learning_rate = tf.placeholder(tf.float32)
 x_image = tf.reshape(x, [-1, 28, 28, 1])
 
-with tf.name_scope('conv1'):
-    w_conv1 = tf.Variable(tf.truncated_normal(shape=[5, 5, 1, 32], stddev=0.1),
+def main(_):
+    with tf.name_scope('conv1'):
+        w_conv1 = tf.Variable(tf.truncated_normal(shape=[5, 5, 1, 32], stddev=0.1),
                               collections=[tf.GraphKeys.GLOBAL_VARIABLES, 'WEIGHTS'])
-    b_conv1 = tf.Variable(tf.constant(0.1, shape=[32]))
-    h_conv1 = tf.nn.relu(tf.nn.conv2d(x_image, w_conv1, strides=[1, 1, 1, 1], padding='SAME') + b_conv1)
-    h_pool1 = tf.nn.max_pool(h_conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+        b_conv1 = tf.Variable(tf.constant(0.1, shape=[32]))
+        h_conv1 = tf.nn.relu(tf.nn.conv2d(x_image, w_conv1, strides=[1, 1, 1, 1], padding='SAME') + b_conv1)
+        h_pool1 = tf.nn.max_pool(h_conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-with tf.name_scope('conv2'):
-    w_conv2 = tf.Variable(tf.truncated_normal(shape=[5, 5, 32, 64], stddev=0.1),
+    with tf.name_scope('conv2'):
+        w_conv2 = tf.Variable(tf.truncated_normal(shape=[5, 5, 32, 64], stddev=0.1),
                               collections=[tf.GraphKeys.GLOBAL_VARIABLES, 'WEIGHTS'])
-    b_conv2 = tf.Variable(tf.constant(0.1, shape=[64]))
-    h_conv2 = tf.nn.relu(tf.nn.conv2d(h_pool1, w_conv2, strides=[1, 1, 1, 1], padding='SAME') + b_conv2)
-    h_pool2 = tf.nn.max_pool(h_conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+        b_conv2 = tf.Variable(tf.constant(0.1, shape=[64]))
+        h_conv2 = tf.nn.relu(tf.nn.conv2d(h_pool1, w_conv2, strides=[1, 1, 1, 1], padding='SAME') + b_conv2)
+        h_pool2 = tf.nn.max_pool(h_conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-with tf.name_scope('fc1'):
-    w_fc1 = tf.Variable(tf.truncated_normal(shape=[7 * 7 * 64, 1024], stddev=0.1),
+    with tf.name_scope('fc1'):
+        w_fc1 = tf.Variable(tf.truncated_normal(shape=[7 * 7 * 64, 1024], stddev=0.1),
                             collections=[tf.GraphKeys.GLOBAL_VARIABLES, 'WEIGHTS'])
-    b_fc1 = tf.Variable(tf.constant(0.1, shape=[1024]))
-    h_pool2_flat = tf.reshape(h_pool2, [-1, 7 * 7 * 64])
-    h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, w_fc1) + b_fc1)
+        b_fc1 = tf.Variable(tf.constant(0.1, shape=[1024]))
+        h_pool2_flat = tf.reshape(h_pool2, [-1, 7 * 7 * 64])
+        h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, w_fc1) + b_fc1)
 
-with tf.name_scope('dropout'):
-    keep_prob = tf.placeholder(tf.float32)
-    h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
+    with tf.name_scope('dropout'):
+        keep_prob = tf.placeholder(tf.float32)
+        h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
-with tf.name_scope('fc2'):
-    W_fc2 = tf.Variable(tf.truncated_normal([1024, 10], stddev=0.1),
+    with tf.name_scope('fc2'):
+        W_fc2 = tf.Variable(tf.truncated_normal([1024, 10], stddev=0.1),
                             collections=[tf.GraphKeys.GLOBAL_VARIABLES, 'WEIGHTS'])
-    b_fc2 = tf.Variable(tf.constant(0.1, shape=[10]))
-    y_out = tf.add(tf.matmul(h_fc1_drop, W_fc2), b_fc2)
+        b_fc2 = tf.Variable(tf.constant(0.1, shape=[10]))
+        y_out = tf.add(tf.matmul(h_fc1_drop, W_fc2), b_fc2)
 
-cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_out))
-l2_loss = tf.add_n([tf.nn.l2_loss(w) for w in tf.get_collection('WEIGHTS')])
-total_loss = cross_entropy + 7e-5 * l2_loss
-train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(total_loss)
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_out))
+    l2_loss = tf.add_n([tf.nn.l2_loss(w) for w in tf.get_collection('WEIGHTS')])
+    total_loss = cross_entropy + 7e-5 * l2_loss
+    train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(total_loss)
 
-sess = tf.Session()
-init_op = tf.global_variables_initializer()
-sess.run(init_op)
+    sess = tf.Session()
+    init_op = tf.global_variables_initializer()
+    sess.run(init_op)
 
-for step in range(3000):
-    batch_xs, batch_ys = mnist.train.next_batch(100)
-    lr = 0.01
-    sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, learning_rate: lr, keep_prob: 0.5})
+    for step in range(3000):
+        batch_xs, batch_ys = mnist.train.next_batch(100)
+        lr = 0.01
+        sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, learning_rate: lr, keep_prob: 0.5})
 
-correct_prediction = tf.equal(tf.argmax(y_out, 1), tf.argmax(y_, 1))
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-print(sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels}))
+    correct_prediction = tf.equal(tf.argmax(y_out, 1), tf.argmax(y_, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    print(sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels,  keep_prob: 0.5}))
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data_dir', type=str, default='data/mnist/input_data',
+                        help='Directory for storing input data')
+    FLAGS, unparsed = parser.parse_known_args()
+    tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
 
 
