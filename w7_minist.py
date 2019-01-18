@@ -5,6 +5,8 @@ data_dir = '/tmp/tensorflow/mnist/input_data'
 mnist = input_data.read_data_sets(data_dir, one_hot=True)
 x = tf.placeholder(tf.float32, [None, 784])
 y_ = tf.placeholder(tf.float32, [None, 10])
+#学习率
+learn_rate = tf.Variable(0.01, dtype=tf.float32)
 x_image = tf.reshape(x, [-1, 28, 28, 1])
 
 with tf.name_scope('conv1'):
@@ -41,7 +43,7 @@ with tf.name_scope('fc2'):
 cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_out))
 l2_loss = tf.add_n([tf.nn.l2_loss(w) for w in tf.get_collection('WEIGHTS')])
 total_loss = cross_entropy + 7e-5 * l2_loss
-train_step = tf.train.GradientDescentOptimizer(0.01).minimize(total_loss)
+train_step = tf.train.GradientDescentOptimizer(learn_rate).minimize(total_loss)
 
 sess = tf.Session()
 init_op = tf.global_variables_initializer()
@@ -50,13 +52,19 @@ sess.run(init_op)
 correct_prediction = tf.equal(tf.argmax(y_out, 1), tf.argmax(y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-for step in range(4000):
-    batch_xs, batch_ys = mnist.train.next_batch(100)
-    if step % 100 == 0:
-        train_accuracy = sess.run(accuracy, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
-        print("step %d, training accuracy %g" % (step, train_accuracy))
-    sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
+# 总共20个周期
+for epoch in range(20):
+    # 刚开始学习率比较大，后来慢慢变小
+    sess.run(tf.assign(learn_rate, 0.01 * (0.95 ** epoch)))
+    for step in range(3000):
+        batch_xs, batch_ys = mnist.train.next_batch(100)
+        if step % 100 == 0:
+            train_accuracy = sess.run(accuracy, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
+            print("step %d, training accuracy %g" % (step, train_accuracy))
+        sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
+    lr = sess.run(learn_rate)
+    print("learn_rate:" % lr)
+    print("test accuracy %g" % sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels, keep_prob: 0.5}))
 
-print("test accuracy %g" % sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels, keep_prob: 0.5}))
 
 
