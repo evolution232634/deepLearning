@@ -57,7 +57,7 @@ def main(_):
     for step in range(3000):
         batch_xs, batch_ys = mnist.train.next_batch(100)
         if step % 100 == 0:
-            train_accuracy = accuracy.eval(feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
+            train_accuracy = sess.run(accuracy, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
             print("step %d, training accuracy %g" % (step, train_accuracy))
         sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
 
