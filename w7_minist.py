@@ -3,13 +3,12 @@ import sys
 from tensorflow.examples.tutorials.mnist import input_data
 import tensorflow as tf
 
-data_dir = '/tmp/tensorflow/mnist/input_data'
-mnist = input_data.read_data_sets(data_dir, one_hot=True)
-x = tf.placeholder(tf.float32, [None, 784])
-y_ = tf.placeholder(tf.float32, [None, 10])
-x_image = tf.reshape(x, [-1, 28, 28, 1])
-
 def main(_):
+    mnist = input_data.read_data_sets(FLAGS.data_dir, one_hot=True)
+    x = tf.placeholder(tf.float32, [None, 784])
+    y_ = tf.placeholder(tf.float32, [None, 10])
+    x_image = tf.reshape(x, [-1, 28, 28, 1])
+
     with tf.name_scope('conv1'):
         w_conv1 = tf.Variable(tf.truncated_normal(shape=[5, 5, 1, 32], stddev=0.1),
                               collections=[tf.GraphKeys.GLOBAL_VARIABLES, 'WEIGHTS'])
