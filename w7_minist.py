@@ -61,6 +61,9 @@ def main(_):
             print("step %d, training accuracy %g" % (step, train_accuracy))
         sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
 
+    print("test accuracy %g" % sess.run(accuracy,
+                                        feed_dict={x: mnist.test.images, y_: mnist.test.labels, keep_prob: 0.5}))
+
 
 
 if __name__ == '__main__':
