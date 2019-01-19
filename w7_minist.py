@@ -8,7 +8,7 @@ y_ = tf.placeholder(tf.float32, [None, 10])
 x_image = tf.reshape(x, [-1, 28, 28, 1])
 batch_size = 100
 n_batch = mnist.train.num_examples // batch_size
-learning_rate = tf.Variable(0.001, dtype=tf.float32)
+learning_rate = tf.Variable(0.01, dtype=tf.float32)
 
 with tf.name_scope('conv1'):
     w_conv1 = tf.Variable(tf.truncated_normal(shape=[5, 5, 1, 32], stddev=0.1),
@@ -44,7 +44,7 @@ with tf.name_scope('fc2'):
 cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_out))
 l2_loss = tf.add_n([tf.nn.l2_loss(w) for w in tf.get_collection('WEIGHTS')])
 total_loss = cross_entropy + 7e-5 * l2_loss
-train_step = tf.train.GradientDescentOptimizer(0.01).minimize(total_loss)
+train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(total_loss)
 
 sess = tf.Session()
 init_op = tf.global_variables_initializer()
@@ -54,7 +54,7 @@ correct_prediction = tf.equal(tf.argmax(y_out, 1), tf.argmax(y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 for epoch in range(21):
-    sess.run(tf.assign(learning_rate, 0.001 * (0.9 ** epoch)))
+    sess.run(tf.assign(learning_rate, 0.01 * (0.9 ** epoch)))
     for step in range(n_batch):
         batch_xs, batch_ys = mnist.train.next_batch(batch_size)
         sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
