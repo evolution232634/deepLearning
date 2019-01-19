@@ -8,7 +8,7 @@ y_ = tf.placeholder(tf.float32, [None, 10])
 x_image = tf.reshape(x, [-1, 28, 28, 1])
 batch_size = 100
 n_batch = mnist.train.num_examples // batch_size
-learning_rate = tf.Variable(0.005, dtype=tf.float32)
+learning_rate = tf.Variable(0.001, dtype=tf.float32)
 
 with tf.name_scope('conv1'):
     w_conv1 = tf.Variable(tf.truncated_normal(shape=[5, 5, 1, 32], stddev=0.1),
@@ -54,7 +54,7 @@ correct_prediction = tf.equal(tf.argmax(y_out, 1), tf.argmax(y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 for epoch in range(21):
-    sess.run(tf.assign(learning_rate, 0.005 * (0.9 ** epoch)))
+    sess.run(tf.assign(learning_rate, 0.001 * (0.9 ** epoch)))
     for step in range(n_batch):
         batch_xs, batch_ys = mnist.train.next_batch(batch_size)
         sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
