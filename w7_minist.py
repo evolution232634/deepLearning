@@ -6,6 +6,9 @@ mnist = input_data.read_data_sets(data_dir, one_hot=True)
 x = tf.placeholder(tf.float32, [None, 784])
 y_ = tf.placeholder(tf.float32, [None, 10])
 x_image = tf.reshape(x, [-1, 28, 28, 1])
+batch_size = 100
+n_batch = mnist.train.num_examples // batch_size
+learning_rate = tf.Variable(0.005, dtype=tf.float32)
 
 with tf.name_scope('conv1'):
     w_conv1 = tf.Variable(tf.truncated_normal(shape=[5, 5, 1, 32], stddev=0.1),
@@ -50,13 +53,13 @@ sess.run(init_op)
 correct_prediction = tf.equal(tf.argmax(y_out, 1), tf.argmax(y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-for step in range(4000):
-    batch_xs, batch_ys = mnist.train.next_batch(100)
-    if step % 100 == 0:
-        train_accuracy = sess.run(accuracy, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
-        print("step %d, training accuracy %g" % (step, train_accuracy))
-    sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
+for epoch in range(21):
+    sess.run(tf.assign(learning_rate, 0.005 * 0.95))
+    for step in range(n_batch):
+        batch_xs, batch_ys = mnist.train.next_batch(batch_size)
+        sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
 
-print("test accuracy %g" % sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels, keep_prob: 0.5}))
+    acc = sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels, keep_prob: 0.5})
+    print("test accuracy %g , Learning_rate: %g" % (acc, learning_rate))
 
 
