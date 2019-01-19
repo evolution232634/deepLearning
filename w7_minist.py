@@ -54,7 +54,7 @@ correct_prediction = tf.equal(tf.argmax(y_out, 1), tf.argmax(y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 for epoch in range(21):
-    sess.run(tf.assign(learning_rate, 0.005 * 0.95))
+    sess.run(tf.assign(learning_rate, 0.005 * (0.9 ** epoch)))
     for step in range(n_batch):
         batch_xs, batch_ys = mnist.train.next_batch(batch_size)
         sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
