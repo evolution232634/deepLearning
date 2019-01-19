@@ -59,7 +59,8 @@ for epoch in range(21):
         batch_xs, batch_ys = mnist.train.next_batch(batch_size)
         sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
 
+    lr = sess.run(learning_rate)
     acc = sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels, keep_prob: 0.5})
-    print("test accuracy %g , Learning_rate: %g" % (acc, learning_rate))
+    print("test accuracy %g , Learning_rate: %g" % (acc, lr))
 
 
